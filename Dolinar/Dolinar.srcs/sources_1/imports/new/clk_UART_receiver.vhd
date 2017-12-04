@@ -3,6 +3,15 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
+
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+--Generate clock signal for UART communication
+--UART is used to communicate with PC
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
 entity clk_UART_receiver is
     Port ( clk_i : in  STD_LOGIC;
            clk_o : out  STD_LOGIC);

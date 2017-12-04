@@ -4,6 +4,15 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 
+
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+--Convert from std logic vector (binary) form to ASCII form
+--This module is used when phase informaiton of triangle wave(0-50) need to be transferred to PC
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
 entity  PCsent_integer_to_ASCII is
   Port (std: in  std_logic_vector (7 downto 0);
         ASCII:out std_logic_vector (15 downto 0):="0000000000000000"

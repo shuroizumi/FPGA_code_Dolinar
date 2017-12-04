@@ -1,16 +1,30 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_ARITH.ALL;
+--use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use IEEE.numeric_std.ALL;
 
+PACKAGE heap_arr_pkg IS
+    type timesegment2 is array (0 to 10) of std_logic_vector (32 downto 0);
+END; 
+
+USE work.heap_arr_pkg.all;
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
-entity APD_feed_2 is
+--Count signal from photon counter and implement feedback operation depending on measurement results
+--This module is used to acquire experimental data
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+
+entity Photon_counter_measurement is
   Port (sw : in std_logic_vector (3 downto 0);
        led: out  std_logic_vector (15 downto 0);
        clk : in std_logic;
---       clk_photon_cnt : in std_logic;
        clk_out : in std_logic;
        JB: in  std_logic;
        JD: out  std_logic_vector (7 downto 4);
@@ -31,74 +45,23 @@ entity APD_feed_2 is
        ampdison : in std_logic_vector (15 downto 0);
        ampdisoff : in std_logic_vector (15 downto 0);
        changeamp: out  std_logic;
-       SGIN0: out std_logic_vector  (3 downto 0):= (others => '0');
-       SGIN1: out std_logic_vector  (3 downto 0):= (others => '0');
-       SGIN2: out std_logic_vector  (3 downto 0):= (others => '0');
-       SGIN3: out std_logic_vector  (3 downto 0):= (others => '0');
-       SGIN4: out std_logic_vector  (3 downto 0):= (others => '0');
-       SGIN5: out std_logic_vector  (3 downto 0):= (others => '0');
-       SGIN6: out std_logic_vector  (3 downto 0):= (others => '0');
-       SGIN7: out std_logic_vector  (3 downto 0):= (others => '0');
-       change: out  std_logic;
        finconvAMPMOD : in  std_logic;
-       clkPmod : in std_logic
+       clkPmod : in std_logic;
+       timesegment : in timesegment2;
+       Voutzero : in std_logic_vector (15 downto 0);
+       Voutpi : in std_logic_vector (15 downto 0);
+       minokrun: in std_logic_vector (32 downto 0):= "000000000000000000000001111101000";
+       maxokrun: in std_logic_vector (32 downto 0):= "000000000000000000000001111101000";
+       maxindex_int : in integer
                );
-end APD_feed_2;
+end Photon_counter_measurement;
 
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
-architecture Behavioral of APD_feed_2 is
-
-component UART_feed_N is 
- port (clkoriginal : in std_logic;
-       clk_UART : in std_logic;
-       RsRx : in  std_logic;
-       dataoutm1: out std_logic_vector (3 downto 0):= (others => '0');
-       dataout0 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout1 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout2 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout3 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout4 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout5 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout6 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout7 : out std_logic_vector (3 downto 0):= (others => '0');
-       dataoutm1d: out std_logic_vector (3 downto 0):= (others => '0');
-       dataout0d : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout1d : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout2d : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout3d : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout4d : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout5d : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout6d : out std_logic_vector (3 downto 0):= (others => '0');
-       dataout7d : out std_logic_vector (3 downto 0):= (others => '0');
-       setout : out  std_logic :='0';
-       dolinarsetout : out  std_logic :='0';
-       phasemodzero: out std_logic:='0';
-       phasemodpi: out std_logic:='0';
-       minchange : out  std_logic :='0';
-       maxchange : out  std_logic :='0';
-       numberfeed : out  std_logic :='0'
-       );
-end component;
-
-component clk_UART_receiver is 
- port (clk_i :in std_logic;
-       clk_o :out std_logic
-       );
-end component;
+architecture Behavioral of Photon_counter_measurement is
 
 
-COMPONENT div_gen_5
-  PORT (
-    aclk : IN STD_LOGIC;
-    s_axis_divisor_tvalid : IN STD_LOGIC;
-    s_axis_divisor_tdata : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-    s_axis_dividend_tvalid : IN STD_LOGIC;
-    s_axis_dividend_tdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-    m_axis_dout_tvalid : OUT STD_LOGIC;
-    m_axis_dout_tdata : OUT STD_LOGIC_VECTOR(47 DOWNTO 0)
-  );
-END COMPONENT;
+
 
 COMPONENT DA_Pmod_feed
   Port (
@@ -138,116 +101,13 @@ COMPONENT div_gen_6
   );
 END COMPONENT;
 
---component clk_wiz_1
---port
--- (-- Clock in ports
---  clk_in1           : in     std_logic;
---  -- Clock out ports
---  clk_out1          : out    std_logic
--- );
---end component;
-
 ------------------------------------------------------------------------------------------------
 signal I : std_logic_vector(32 downto 0):= (others => '0');
 signal binchange : std_logic_vector(32 downto 0):= (others => '0');
-
 signal j : std_logic_vector(50 downto 0):= (others => '0');
-
 signal cnt : std_logic_vector(32 downto 0):= (others => '0');
 signal cnt2 : std_logic_vector(32 downto 0):= (others => '0');
-
-signal clk_U : std_logic;
-signal DOUTm1  : std_logic_vector (3 downto 0);
-signal DOUT0  : std_logic_vector (3 downto 0);
-signal DOUT1  : std_logic_vector (3 downto 0);
-signal DOUT2  : std_logic_vector (3 downto 0);
-signal DOUT3  : std_logic_vector (3 downto 0);
-signal DOUT4  : std_logic_vector (3 downto 0);
-signal DOUT5  : std_logic_vector (3 downto 0);
-signal DOUT6  : std_logic_vector (3 downto 0);
-signal DOUT7  : std_logic_vector (3 downto 0);
-signal DOUTm1D  : std_logic_vector (3 downto 0);
-signal DOUT0D  : std_logic_vector (3 downto 0);
-signal DOUT1D  : std_logic_vector (3 downto 0);
-signal DOUT2D  : std_logic_vector (3 downto 0);
-signal DOUT3D  : std_logic_vector (3 downto 0);
-signal DOUT4D  : std_logic_vector (3 downto 0);
-signal DOUT5D  : std_logic_vector (3 downto 0);
-signal DOUT6D  : std_logic_vector (3 downto 0);
-signal DOUT7D  : std_logic_vector (3 downto 0);
-signal int1  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000000  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000000  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000000  : std_logic_vector (32 downto 0):= (others => '0');
-
-signal int1D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000000D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000000D  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000000D  : std_logic_vector (32 downto 0):= (others => '0');
-
-signal timesegindex10 : std_logic_vector (7 downto 0):= (others => '0');
-signal timesegindex1 : std_logic_vector (7 downto 0):= (others => '0');
-signal timesegindex : std_logic_vector (7 downto 0):= (others => '0');
-signal timesegindex_int : integer range 0 to 10;
-
-signal int1zero  :  integer;
-signal int10zero  :  integer;
-signal int100zero :  integer;
-signal int1000zero  :  integer;
-signal int10000zero  :  integer;
-
-
-signal int1min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000000min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000000min  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000000min  : std_logic_vector (32 downto 0):= (others => '0');
-
-signal int1max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int1000000max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int10000000max  : std_logic_vector (32 downto 0):= (others => '0');
-signal int100000000max  : std_logic_vector (32 downto 0):= (others => '0');
-
-signal W  : std_logic_vector (32 downto 0):= "000000000000000000000001111101000";
-signal WA  : std_logic_vector (32 downto 0):= "000000000000000000000000111110100";
-signal Wzero  :  integer;
---signal Wpi :  integer;
-signal W2  :  integer;
---signal W2pi :  integer;
-
-signal SO  : std_logic :='0';
-signal DO  : std_logic :='0';
-signal phasemodzero: std_logic:='0';
-signal phasemodzero_reg: std_logic:='0';
-signal phasemodpi: std_logic:='0';
-signal phasemodpi_reg: std_logic:='0';
-signal rest: std_logic :='0';
 signal okrun: std_logic_vector (32 downto 0):= "000000000000000000000001111101000";
-signal minokrun: std_logic_vector (32 downto 0):= "000000000000000000000001111101000";
-signal maxokrun: std_logic_vector (32 downto 0):= "000000000000000000000001111101000";
-signal minchange : std_logic :='0';
-signal maxchange : std_logic :='0';
-signal numberfeed : std_logic :='0';
-
 
 signal p  : std_logic_vector (3 downto 0):= (others => '0');
 signal q  : natural;
@@ -262,28 +122,6 @@ signal psiminuscountDIS10: std_logic_vector (3 downto 0):= (others => '0');
 signal psiminuscountDIS1: std_logic_vector (3 downto 0):= (others => '0');
 
 
-
-
-signal Wstd:  std_logic_vector (31 downto 0);
-signal Wstdpi:  std_logic_vector (31 downto 0);
-signal stage : std_logic_vector(2 downto 0):= (others => '0');
-signal status: std_logic_vector  (4 downto 0):= (others => '0');
-signal stagepi : std_logic_vector(2 downto 0):= (others => '0');
-signal statuspi: std_logic_vector  (4 downto 0):= (others => '0');
-signal s_axis_divisor_tvalid : std_logic :='0';
-signal s_axis_divisor_tdata :  std_logic_vector  (15 downto 0):= (others => '0');
-signal s_axis_dividend_tvalid : std_logic :='0';
-signal s_axis_dividend_tdata:  std_logic_vector  (31 downto 0):= (others => '0');
-signal m_axis_dout_tvalid: std_logic :='0';
-signal m_axis_dout_tdata :  std_logic_vector  (47 downto 0):= (others => '0');
-signal Vquotient : std_logic_vector (31 downto 0);
-signal Vreminder : std_logic_vector (14 downto 0);
-signal finish : std_logic :='0';
-signal Vquotientpi : std_logic_vector (31 downto 0);
-signal Voutzero : std_logic_vector (15 downto 0);
-signal Voutpi : std_logic_vector (15 downto 0);
-
-
 signal analogbit : std_logic_vector (15 downto 0);
 signal finconv : std_logic:='0';
 signal changeamp_reg : std_logic;
@@ -292,16 +130,9 @@ signal parity : std_logic;
 
 
 
-type timesegment2 is array (0 to 10) of std_logic_vector (32 downto 0);
-signal timesegment :timesegment2;
-signal stageDO : std_logic_vector (2 downto 0);
 signal index : integer range 0 to 15;
 signal index2 : integer range 0 to 15;
 signal maxindex : std_logic_vector (10 downto 0);
-signal maxindex_int : integer;
-signal int1numberfeed  : std_logic_vector (10 downto 0):= (others => '0');
-signal int10numberfeed  : std_logic_vector (10 downto 0):= (others => '0');
-signal int100numberfeed  : std_logic_vector (10 downto 0):= (others => '0');
 signal cntresult : std_logic_vector (10 downto 0):= (others => '0');
 
 
@@ -348,26 +179,11 @@ signal Vquotient_div3_2 : std_logic_vector (13 downto 0);
 signal Vreminder_div3_2 : std_logic_vector (9 downto 0);
 signal pp  : std_logic_vector (3 downto 0):= (others => '0');
 
-signal clk_photon_cnt :  std_logic:='0';
 signal y :  std_logic:='0';
 ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------
 begin
-iclk_UART: clk_UART_receiver port map(clk_i=>clk, clk_o=>clk_U);
-iUART: UART_feed_N port map(clkoriginal=> clk, clk_UART=>clk_U, RsRx=>RsRx,
-dataoutm1=>DOUTm1,dataout0=>DOUT0,dataout1=>DOUT1,dataout2=>DOUT2,dataout3=>DOUT3,dataout4=>DOUT4,dataout5=>DOUT5,dataout6=>DOUT6,dataout7=>DOUT7,
-dataoutm1d=>DOUTm1D,dataout0d=>DOUT0D,dataout1d=>DOUT1D,dataout2d=>DOUT2D,dataout3d=>DOUT3D,dataout4d=>DOUT4D,dataout5d=>DOUT5D,dataout6d=>DOUT6D,dataout7d=>DOUT7D, 
-setout=>SO, dolinarsetout=>DO, phasemodzero=>phasemodzero, phasemodpi=>phasemodpi, minchange=>minchange, maxchange=>maxchange,numberfeed=>numberfeed);
-idiv_gen_5 : div_gen_5
-  PORT MAP (
-    aclk => clk,
-    s_axis_divisor_tvalid => s_axis_divisor_tvalid,
-    s_axis_divisor_tdata => s_axis_divisor_tdata,
-    s_axis_dividend_tvalid => s_axis_dividend_tvalid,
-    s_axis_dividend_tdata => s_axis_dividend_tdata,
-    m_axis_dout_tvalid => m_axis_dout_tvalid,
-    m_axis_dout_tdata => m_axis_dout_tdata
-  );
+
   
 --iDA_Pmod_feed: DA_Pmod_feed port map(
 --     clkPmod=>clkPmod,
@@ -403,15 +219,6 @@ PORT MAP (
 );
 -- INST_TAG_END ------ End INSTANTIATION Template ---------
 
---clkphotoncnt : clk_wiz_1
---   port map ( 
---   -- Clock in ports
---   clk_in1 => clk,
---  -- Clock out ports  
---   clk_out1 => clk_photon_cnt              
--- );
-
-
 ---------------------------------------------------------------------------
 -----------------------
 
@@ -424,7 +231,6 @@ if ( clk_out'event and clk_out = '1') then
         cnt<= (others => '0');
         cnt2<= (others => '0');
         I<= (others => '0'); 
-        rest<='0';
         analogbit<=(others => '0');
         ampdis<=ampdisdef;
         changeamp_reg<='0';
@@ -680,7 +486,7 @@ if ( clk_out'event and clk_out = '1') then
     end if;
 end if;
 end process;
-change_phase<=changeamp_reg or phasemodzero;
+change_phase<=changeamp_reg;
 changeamp<=changeamp_reg;
 
 --------------------------------------------------------------------
@@ -976,266 +782,4 @@ case pp is
 end process;
 
 
-
-
-----set total counting time ms
---process (SO,DOUTm1,DOUT0,DOUT1,DOUT2,DOUT3,DOUT4,DOUT5,DOUT6,DOUT7,int100000000,int10000000,int1000000,int100000,int10000,int1000,int100,int10,int1) begin
---    if (SO='1') then
---     --100000000‚ÌˆÊ -1S
---    int100000000 <="00101111101011110000100000000"* DOUTm1;
---     --10000000‚ÌˆÊ -100mS
---    int10000000 <="00000100110001001011010000000"* DOUT0;
---     --1000000‚ÌˆÊ -10mS
---    int1000000 <="00000000011110100001001000000"* DOUT1;
---     --100000‚ÌˆÊ -1mS
---    int100000 <="00000000000011000011010100000"* DOUT2;
---     --10000‚ÌˆÊ 100ƒÊS
---    int10000 <="00000000000000010011100010000"* DOUT3;
---    --1000‚ÌˆÊ 10ƒÊS
---    int1000 <="00000000000000000001111101000"* DOUT4 ;
---    --100‚ÌˆÊ  1ƒÊS
---    int100 <= "00000000000000000000001100100"* DOUT5;
---    --10‚ÌˆÊ 100nS * 1
---    int10 <= "00000000000000000000000001010" * DOUT6;    
---    int1<= "00000000000000000000000000001" * DOUT7;
---    W<=int1+int10+int100+int1000+int10000+int100000+int1000000+int10000000+int100000000;
---    end if;
---end process;
-
-process (clk,DO,DOUTm1D,DOUT0D,DOUT1D,DOUT2D,DOUT3D,DOUT4D,DOUT5D,DOUT6D,DOUT7D,int100000000D,int10000000D,int1000000D,int100000D,int10000D,int1000D,int100D,int10D,int1D) begin
-if (clk'event and clk = '1') then
-    case stageDO is 
-    when "000" =>
-        if (DO='1') then
-            stageDO<=stageDO+1;
-        end if;
-    when "001" =>            
-        timesegindex10 <= "1010" * DOUTm1D;
-        timesegindex1<= "0001" * DOUT0D;
-     --1000000‚ÌˆÊ -100mS
-        int1000000D <="00000000011110100001001000000"* DOUT1D;
-         --100000‚ÌˆÊ -10mS
-        int100000D <="00000000000011000011010100000"* DOUT2D;
-        --1000‚ÌˆÊ 1mS
-        int10000D <="00000000000000010011100010000"* DOUT3D;
-        --1000‚ÌˆÊ 100ƒÊS
-        int1000D <="00000000000000000001111101000"* DOUT4D ;
-        --100‚ÌˆÊ  10ƒÊS
-        int100D <= "00000000000000000000001100100"* DOUT5D;
-        --10‚ÌˆÊ 1ƒÊS
-        int10D <= "00000000000000000000000001010" * DOUT6D;    
-        --1‚ÌˆÊ 100nS * 1
-        int1D<= "00000000000000000000000000001" * DOUT7D;
-        stageDO<=stageDO+1;
-    when "010" =>
-        timesegindex<=timesegindex10+timesegindex1;
-        WA<=int1D+int10D+int100D+int1000D;
-        stageDO<=stageDO+1;
-    when "011" => 
-        timesegindex_int<=CONV_INTEGER(unsigned(timesegindex));
-        WA<=WA+int10000D+int100000D+int1000000D;
-        stageDO<=stageDO+1;
-    when "100" => 
-        timesegment(timesegindex_int)<=WA;
-        stageDO<=(others=>'0');       
-    when others => stageDO<=(others=>'0');
-    end case;
-end if;
-end process;
-
-
-
-
-process (clk) begin
-if (clk'event and clk= '1') then
-case stage is
-when "000"=>
-    if (phasemodzero='1') then
-     int10000zero <=CONV_INTEGER(unsigned(DOUT3)) *10000;
-     --1000‚ÌˆÊ 100ƒÊS
-     int1000zero <=CONV_INTEGER(unsigned(DOUT4)) *1000;
-     --100‚ÌˆÊ  10ƒÊS
-     int100zero <= CONV_INTEGER(unsigned(DOUT5)) *100;
-     --10‚ÌˆÊ 1ƒÊS
-     int10zero <= CONV_INTEGER(unsigned(DOUT6)) *10;      
-     --1‚ÌˆÊ 100nS * 1
-     int1zero<= CONV_INTEGER(unsigned(DOUT7)) *1;
-     stage<=stage+1;
-     phasemodzero_reg<='1';
-    elsif (phasemodpi='1') then
-        int10000zero <=CONV_INTEGER(unsigned(DOUT3)) *10000;
-        --1000‚ÌˆÊ 100ƒÊS
-        int1000zero <=CONV_INTEGER(unsigned(DOUT4)) *1000;
-        --100‚ÌˆÊ  10ƒÊS
-        int100zero <= CONV_INTEGER(unsigned(DOUT5)) *100;
-        --10‚ÌˆÊ 1ƒÊS
-        int10zero <= CONV_INTEGER(unsigned(DOUT6)) *10;      
-        --1‚ÌˆÊ 100nS * 1
-        int1zero<= CONV_INTEGER(unsigned(DOUT7)) *1;
-        stage<=stage+1;
-        phasemodpi_reg<='1';  
-    end if;
-when "001"=>
-    Wzero<=int1zero+int10zero+int100zero+int1000zero+int10000zero;
-    stage<=stage+1;
-when "010"=>
-    W2<=Wzero*65536;
-    stage<=stage+1;
-when "011"=>
-    Wstd<=conv_std_logic_vector(W2,32);
-    stage<=stage+1;
-when "100"=>
-   case status is
-   when "00000" =>
-       s_axis_divisor_tdata<="0110000110101000"; 
-       s_axis_dividend_tdata<=Wstd;    
-       status<="00001";
-   when "00001" =>
-       s_axis_divisor_tvalid<='1';
-       s_axis_dividend_tvalid<='1';
-       status<="00010";
-   when "00010" =>
-       if (m_axis_dout_tvalid='1') then
-          s_axis_divisor_tvalid<='0';
-          s_axis_dividend_tvalid<='0';
-          status<="00011";
-       end if;            
-   when "00011" =>
-        if (m_axis_dout_tvalid='0') then
---                47-16 =>quotient 14-0 => reminder
-          Vquotient <=m_axis_dout_tdata(47 downto 16);
-          Vreminder <=m_axis_dout_tdata(14 downto 0);
-          status<="00100";
-          finish<='1';
---          led<=Vquotient(15 downto 0);
-        end if; 
-   when "00100" =>
-    if (phasemodzero_reg='1') then
-        Voutzero<= Vquotient(15 downto 0);
-        phasemodzero_reg<='0';
-    elsif (phasemodpi_reg='1') then
-        Voutpi<= Vquotient(15 downto 0);
-        phasemodpi_reg<='0'; 
-    end if;
-    status<="00000";
-    stage<=stage+1;
-   when others =>  status<="00000";
-   end case; 
-when  "101"=>
-    finish<='1';
-    stage<=(others=>'0');
-when others =>  stage<=(others=>'0');     
-end case;
-end if;
-end process;
-
-
-
-
-process (minchange,DOUTm1,DOUT0,DOUT1,DOUT2,DOUT3,DOUT4,DOUT5,DOUT6,DOUT7,int100000000min,int10000000min,int1000000min,int100000min,int10000min,int1000min,int100min,int10min,int1min) begin
-    if (minchange='1') then
-     --100000000‚ÌˆÊ -10S
-    int100000000min <="00101111101011110000100000000"* DOUTm1;
-     --10000000‚ÌˆÊ -1S
-    int10000000min <="00000100110001001011010000000"* DOUT0;
-     --1000000‚ÌˆÊ -100mS
-    int1000000min <="00000000011110100001001000000"* DOUT1;
-     --100000‚ÌˆÊ -10mS
-    int100000min <="00000000000011000011010100000"* DOUT2;
-    --1000‚ÌˆÊ 1mS
-    int10000min <="00000000000000010011100010000"* DOUT3;
-    --1000‚ÌˆÊ 100ƒÊS
-    int1000min <="00000000000000000001111101000"* DOUT4;
-    --100‚ÌˆÊ  10ƒÊS
-    int100min <= "00000000000000000000001100100"* DOUT5;
-    --10‚ÌˆÊ 1ƒÊS
-    int10min <= "00000000000000000000000001010" * DOUT6;    
-    --1‚ÌˆÊ 100nS * 1
-    int1min<= "00000000000000000000000000001" * DOUT7;
-    minokrun<=int1min+int10min+int100min+int1000min+int10000min+int100000min+int1000000min+int10000000min+int100000000min;
-    end if;
-end process;
-
-
-
-process (maxchange,DOUTm1,DOUT0,DOUT1,DOUT2,DOUT3,DOUT4,DOUT5,DOUT6,DOUT7,int100000000max,int10000000max,int1000000max,int100000max,int10000max,int1000max,int100max,int10max,int1max) begin
-    if (maxchange='1') then
-     --100000000‚ÌˆÊ -10S
-    int100000000max <="00101111101011110000100000000"* DOUTm1;
-     --10000000‚ÌˆÊ -1S
-    int10000000max <="00000100110001001011010000000"* DOUT0;
-     --1000000‚ÌˆÊ -100mS
-    int1000000max <="00000000011110100001001000000"* DOUT1;
-     --100000‚ÌˆÊ -10mS
-    int100000max <="00000000000011000011010100000"* DOUT2;
-    --1000‚ÌˆÊ 1mS
-    int10000max <="00000000000000010011100010000"* DOUT3;
-    --1000‚ÌˆÊ 100ƒÊS
-    int1000max <="00000000000000000001111101000"* DOUT4;
-    --100‚ÌˆÊ  10ƒÊS
-    int100max <= "00000000000000000000001100100"* DOUT5;
-    --10‚ÌˆÊ 1ƒÊS
-    int10max <= "00000000000000000000000001010" * DOUT6;    
-    --1‚ÌˆÊ 100nS * 1
-    int1max<= "00000000000000000000000000001" * DOUT7;
-    maxokrun<=int1max+int10max+int100max+int1000max+int10000max+int100000max+int1000000max+int10000000max+int100000000max;
-    end if;
-end process;
-
-
-process (numberfeed,DOUT5,DOUT6,DOUT7,int100numberfeed,int10numberfeed,int1numberfeed) begin
-    if (numberfeed='1') then
-    --100‚ÌˆÊ  10ƒÊS
-    int100numberfeed <= "1100100"* DOUT5;
-    --10‚ÌˆÊ 1ƒÊS
-    int10numberfeed <= "0001010" * DOUT6;    
-    --1‚ÌˆÊ 100nS * 1
-    int1numberfeed<= "0000001" * DOUT7;
-    maxindex<=int1numberfeed+int10numberfeed+int100numberfeed;
-    maxindex_int<=CONV_INTEGER(unsigned(maxindex));
-    end if;
-end process;
-
-
-process (SO,DO, phasemodzero, phasemodpi,minchange,maxchange,numberfeed)
-begin
-if (SO='1') then
-    SGIN0<=DOUTm1;
-    SGIN1<=DOUT0;
-    SGIN2<=DOUT1;
-    SGIN3<=DOUT2;
-    SGIN4<=DOUT3;
-    SGIN5<=DOUT4;
-    SGIN6<=DOUT5;
-    SGIN7<=DOUT6;
-elsif (DO='1') then
-    SGIN0<=DOUTm1D;
-    SGIN1<=DOUT0D;
-    SGIN2<=DOUT1D;
-    SGIN3<=DOUT2D;
-    SGIN4<=DOUT3D;
-    SGIN5<=DOUT4D;
-    SGIN6<=DOUT5D;
-    SGIN7<=DOUT6D;
-elsif ( minchange='1' or maxchange='1' ) then
-    SGIN0<=DOUT0;
-    SGIN1<=DOUT1;
-    SGIN2<=DOUT2;
-    SGIN3<=DOUT3;
-    SGIN4<=DOUT4;
-    SGIN5<=DOUT5;
-    SGIN6<=DOUT6;
-    SGIN7<=DOUT7;
-elsif (phasemodzero='1' or phasemodpi='1'or numberfeed='1') then
-    SGIN0<="0000";
-    SGIN1<="0000";
-    SGIN2<="0000";
-    SGIN3<=DOUT3;
-    SGIN4<=DOUT4;
-    SGIN5<=DOUT5;
-    SGIN6<=DOUT6;
-    SGIN7<=DOUT7;
-end if;
-end process;
-change<=SO or DO or minchange or maxchange or phasemodzero or phasemodpi or numberfeed;
 end Behavioral;

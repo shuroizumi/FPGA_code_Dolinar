@@ -3,10 +3,18 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
+
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+--Display light on NEXYS4 board
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
 entity segment is
   Port (seg : out std_logic_vector (6 downto 0):= (others => '1');
        an: out std_logic_vector (7 downto 0):= (others => '1');
-       clkseg: in std_logic;
+       clk: in std_logic;
        int_o0 : in std_logic_vector (3 downto 0):= (others => '0');
        int_o1 : in std_logic_vector (3 downto 0):= (others => '0');
        int_o2 : in std_logic_vector (3 downto 0):= (others => '0');
@@ -24,8 +32,8 @@ signal count: std_logic_vector (20 downto 0);
 
 begin
 --an<=outan;
-process(clkseg) begin
-    if (clkseg' event and clkseg='1') then
+process(clk) begin
+    if (clk' event and clk='1') then
         if (count <= 2500) then
             an<= "11111110";
             count <= count+1;

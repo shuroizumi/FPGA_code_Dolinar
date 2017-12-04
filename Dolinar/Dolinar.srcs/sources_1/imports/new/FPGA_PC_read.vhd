@@ -4,6 +4,12 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 
+
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
+--Send ascii form data to PC
+------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------
 entity FPGA_PC_read is
 Port (clk : in std_logic;
       sw :  in std_logic;
@@ -21,7 +27,7 @@ Port (clk : in std_logic;
      phi:in std_logic_vector (7 downto 0);
      finread: out  std_logic;
      resetPCread: in  std_logic;
-     binarymode: in  std_logic;
+     transmode: in  std_logic;
      datasent: out  std_logic
    );
 end FPGA_PC_read;
@@ -90,7 +96,7 @@ else
                 ascii5_reg<=ascii5;
                 ascii6_reg<=ascii6;
                 ascii7_reg<=ascii7;
---                if (binarymode='1') then
+--                if (transmode='1') then
 --                    datbit<=5;
 --                else
                 datbit<=0;
@@ -98,7 +104,7 @@ else
                 state_reg<=state_reg+1;
             end if;
         when "001" =>
-            if (binarymode='0') then
+            if (transmode='0') then
                 if (datbit=0) then
                    Datasend<=ascii2_reg;
                 elsif (datbit=1) then
@@ -175,7 +181,7 @@ else
                RsTx<='1'; 
                if (s_reg=109-1) then
                    s_reg<=(others=>'0');
-                  if (binarymode='0') then 
+                  if (transmode='0') then 
                    if (datbit=6) then
                         state_reg<="000";
                         datbit<=0;
