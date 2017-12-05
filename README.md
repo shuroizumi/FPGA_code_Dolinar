@@ -1,7 +1,7 @@
 # FPGA_code
 
-File Name     Function
+File Name  :   Function
 
-Dither        Dither (arbitrary) phase lock
+Dither    :    Dither (arbitrary) phase lock
 
-Dolinar       Dolinar project
+Dolinar   :    Dolinar project
