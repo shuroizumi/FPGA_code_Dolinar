@@ -3,8 +3,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity Pmod3 is
-  Port (clkori: in std_logic;
+entity DAC is
+  Port (
         clkPmod : in std_logic;
         clk_out : in std_logic;
         JAPmod : out std_logic_vector (7 downto 4);
@@ -14,9 +14,9 @@ entity Pmod3 is
         phiin: in std_logic_vector (7 downto 0);
         phiout: out std_logic_vector (7 downto 0)
         );
-end Pmod3;
+end DAC;
 
-architecture Behavioral of Pmod3 is
+architecture Behavioral of DAC is
 
 signal state_reg: std_logic:= '0';
 constant W0: integer := 17;
@@ -30,7 +30,7 @@ signal phi_reg: std_logic_vector (7 downto 0);
 begin
 JAPmod(7)<=clkPmod;
 
-process (clkori, clkPmod,state_reg,updateana,phiin) begin
+process (clkPmod,state_reg,updateana,phiin) begin
     case state_reg is 
     when '0'=> 
 --      finconv_reg<='0';  

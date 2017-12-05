@@ -368,14 +368,14 @@ component control_PID is
 end component;
 
 --50 MHz
-component divja is
-    Port ( clkja_i : in  STD_LOGIC;
-           clkja_o : out  STD_LOGIC);
+component clk_50MHz is
+    Port ( clk : in  STD_LOGIC;
+           clk_50 : out  STD_LOGIC);
 end component;
 
 --DA output MHz
-component Pmod3 is
-  Port (clkori: in std_logic;
+component DAC is
+  Port (
        clkPmod : in std_logic;
        clk_out : in std_logic;
        JAPmod : out std_logic_vector (7 downto 4);
@@ -716,7 +716,7 @@ signal WAPDtimeset  : STD_LOGIC_VECTOR(32 DOWNTO 0);
 
 
 
---iPmod3
+--iDAC
 signal anlbit : std_logic_vector (15 downto 0);
 signal updatewave  : std_logic;
 
@@ -933,10 +933,10 @@ clk_out1 =>clk_out,
 reset => reset,
 locked => locked);
 
-idivja: divja 
+iclk_50MHz: clk_50MHz 
 port map(
-clkja_i=>clk, 
-clkja_o=>sclk);
+clk=>clk, 
+clk_50=>sclk);
 
 --7-segment display
 isegment: segment 
@@ -1070,9 +1070,8 @@ WAMPsetout=>WAMPsetout
 
 --------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------
-iPmod3: Pmod3 
+iDAC: DAC 
 port map(
-clkori=>clk,
 clkPmod=>sclk, 
 clk_out=>clk_out, 
 JAPmod=>JA, 
