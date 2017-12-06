@@ -16,19 +16,18 @@ Dither    :    Dither (arbitrary) phase lock
           ASCII_integer.vhd	: Convert ASCII code to integer
           FPGA_PC_read.vhd	: Transmit data from FPGA to PC          
           PCsent_integer_to_ASCII.vhd	: Integer to ASCII code	          
-          Pmod3.vhd	: Digital to analog conversion          
           UARAT_receiver.vhd	: Decode ASCII code from PC          
           UART.vhd	: Decode ASCII code from PC	          
           clk_UART_receiver.vhd	: Generate clock signal for UART communication	          
           control_PID.vhd	: Convert decoded code to paramters used for functions	          
-          divja.vhd	: Generate 50MHz clock	          
           segment.vhd	: Display on Nexys4	          
-          setexpectedcount.vhd	: Set expected count
       
       new
       
         Arbitrary_lock.vhd : Arbitrary phase lock
+        DAC.vhd	: Digital to analog conversion         
         DitherLock.vhd : Dither phase lock (Not used if Arbitrary_lock.vhd is used)
+        clk_50MHz.vhd	: Generate 50MHz clock	         
         main_Lock.vhd : Main module
         sine_wave.vhd : Generate sine wave for modulation
         std_vector_to_floating.vhd : Convert std logic vector to floating point
