@@ -5,7 +5,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 
 entity UART is
-  Port (clkoriginal : in std_logic;
+  Port (
        clk_UART : in std_logic;
        sw : in std_logic;
        RsRx : in  std_logic;
@@ -29,28 +29,45 @@ entity UART is
        I : out  std_logic :='0';
 --       set r
        r : out  std_logic :='0';
---       set Low pass filter 
-       L : out  std_logic :='0';
 --       set freqency of wave
        M : out  std_logic :='0';
 --       run wave generator
        G : out  std_logic :='0';
---       set amplitude of wave       
-       waveamp : out  std_logic :='0';
 --       run APD count
        Run : out  std_logic :='0';
+--       set locking time
+       Lock : out  std_logic :='0';
+--       set data aquisition time
+       A : out  std_logic :='0'; 
 --       run transfer data to PC
        T : out  std_logic :='0';
        polarity: out  integer range -1 to 1:=1;
-       offphase : out  std_logic :='0';
-       g1 : out  std_logic :='0';
-       g2 : out  std_logic :='0';
        PAMPLOCK : out  std_logic :='0';
        IAMPLOCK : out  std_logic :='0';       
        rAMPLOCK : out  std_logic :='0';
        AMPLOCKpolarity: out  integer range -1 to 1:=1;
        CAMPLOCK : out  std_logic :='0';
        amplockon: out  std_logic :='0';
+       setampdef: out STD_LOGIC;
+       setampoff: out STD_LOGIC;
+       setampon: out STD_LOGIC;
+       B: out STD_LOGIC;
+       BAMPLOCK: out STD_LOGIC;
+       DO : out  std_logic :='0';
+       phasemodzero: out std_logic:='0';
+       phasemodpi: out std_logic:='0';
+       minchange : out  std_logic :='0';
+       maxchange : out  std_logic :='0';
+       numberfeed : out  std_logic :='0';     
+       APDtimeset : out  std_logic :='0'; 
+       AMPsetout : out  std_logic :='0';       
+--       set amplitude of wave       
+       waveamp : out  std_logic :='0';
+--       set Low pass filter 
+       L : out  std_logic :='0';
+       offphase : out  std_logic :='0';
+       g1 : out  std_logic :='0';
+       g2 : out  std_logic :='0';
        z : out  std_logic :='0'; 
        x : out  std_logic :='0'; 
        v : out  std_logic :='0'; 
@@ -121,22 +138,37 @@ if(sw='1') then
    I<='0';
    r<='0';
    M<='0';
-   waveamp<='0';
-   L<='0'; 
+   Lock<='0'; 
+   A<='0'; 
    G<='0';
    Run<='0';
    T<='0';
    polarity<=1;
-   offphase<='0'; 
-   g1_reg<='0';
-   g2_reg<='0';
-   g_reg<='0';               
    setout_reg<='0';
    PAMPLOCK<='0';
    IAMPLOCK<='0';
    rAMPLOCK<='0';
    AMPLOCKpolarity<=1;
    CAMPLOCK<='0';
+   setampdef<='0';
+   setampoff<='0';
+   setampon<='0';
+   B<='0';
+   BAMPLOCK<='0';
+   DO<='0';
+   phasemodzero<='0';
+   phasemodpi<='0';
+   minchange<='0';
+   maxchange<='0';
+   numberfeed<='0';
+   APDtimeset<='0';
+   AMPsetout<='0';
+   waveamp<='0';
+   L<='0';
+   offphase<='0'; 
+   g1_reg<='0';
+   g2_reg<='0';
+   g_reg<='0';               
    z<='0';
    x<='0';
    v<='0'; 
@@ -221,6 +253,34 @@ if (clk_UART'event and clk_UART = '1') then
                         state_reg<="000";
                         waveamp<='1';
                         J<='1';                             
+                   elsif (d_reg="01001100" and turn=0) then
+                         state_reg<="000";                        
+                         Lock<='1';    
+                         J<='1';               
+                    elsif (d_reg="01000001" and turn=0) then
+                          state_reg<="000";                        
+                          A<='1';    
+                          J<='1';               
+                    elsif (d_reg="01100100" and turn=0) then
+                          state_reg<="000";
+                          setampdef<='1';
+                          J<='1';     
+                    elsif (d_reg="01101110" and turn=0) then
+                          state_reg<="000";
+                          setampon<='1'; 
+                          J<='1';    
+                    elsif (d_reg="01100110" and turn=0) then
+                          state_reg<="000";
+                          setampoff<='1';     
+                          J<='1';                 
+                    elsif (d_reg="01000010" and turn=0) then
+                          state_reg<="000";
+                          J<='1';        
+                          B<='1';
+                    elsif (d_reg="01100010" and turn=0) then
+                          state_reg<="000";
+                          J<='1';        
+                          BAMPLOCK<='1';
                    elsif (d_reg="01010010" and turn=0) then
                         state_reg<="000";                        
                         Run<='1';    
@@ -282,8 +342,44 @@ if (clk_UART'event and clk_UART = '1') then
                     elsif (d_reg="01111001" ) then
                             state_reg<="000";                        
                             amplockon<=not amplockon_reg;    
-                            amplockon_reg<=not amplockon_reg;                      
-                    elsif (d_reg="01111010" and turn=0) then
+                            amplockon_reg<=not amplockon_reg;      
+                    elsif (d_reg="01000100" and turn=0) then
+                            state_reg<="000";
+                            DO<='1';
+                            J<='1';
+                    elsif (d_reg="01000110" and turn=0) then
+                            state_reg<="000";
+                            setout_reg<='1';
+                            J<='1';
+                    elsif (d_reg="01010101" and turn=0) then
+                            state_reg<="000";
+                            phasemodzero<='1';
+                            J<='1';
+                    elsif (d_reg="01010110" and turn=0) then
+                            state_reg<="000";
+                            phasemodpi<='1';
+                            J<='1';
+                    elsif (d_reg="01001100" and turn=0) then
+                            state_reg<="000";
+                            minchange<='1';
+                            J<='1';
+                    elsif (d_reg="01000001" and turn=0) then
+                            state_reg<="000";
+                            maxchange<='1';
+                            J<='1';
+                    elsif (d_reg="01001110" and turn=0) then
+                            state_reg<="000";
+                            numberfeed<='1';
+                            J<='1';                
+                    elsif (d_reg="01010011") then
+                            state_reg<="000";
+                            APDtimeset<='1';
+                            J<='1';
+                    elsif (d_reg="01000110" and turn=0) then
+                            state_reg<="000";
+                            AMPsetout<='1';
+                            J<='1';                                                   
+                     elsif (d_reg="01111010" and turn=0) then
                         state_reg<="000";                        
                         z<='1';    
                         x<='0';  
@@ -373,17 +469,33 @@ if (clk_UART'event and clk_UART = '1') then
                I<='0';
                r<='0';
                M<='0';
+               Lock<='0'; 
+               A<='0'; 
+               setout_reg<='0';
+               PAMPLOCK<='0';
+               IAMPLOCK<='0';
+               rAMPLOCK<='0';
+               CAMPLOCK<='0';          
+               setampdef<='0';
+               setampoff<='0';
+               setampon<='0';
+               B<='0';
+               BAMPLOCK<='0';
+               DO<='0';
+               phasemodzero<='0';
+               phasemodpi<='0';
+               minchange<='0';
+               maxchange<='0';
+               numberfeed<='0';
+               APDtimeset<='0';
+               AMPsetout<='0';
                waveamp<='0';
                L<='0'; 
-               setout_reg<='0';
                offphase<='0'; 
                g1_reg<='0';
                g2_reg<='0';
                g_reg<='0';               
-               PAMPLOCK<='0';
-               IAMPLOCK<='0';
-               rAMPLOCK<='0';
-               CAMPLOCK<='0';                
+                     
        when others => state_reg<="000";
        end case; 
   end if;
