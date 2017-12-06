@@ -40,12 +40,9 @@ entity control_PID is
        P : in std_logic :='0';
        I : in std_logic :='0';
        r : in std_logic :='0';
-       Lowpass: in std_logic :='0';
        gp : out std_logic_vector  (31 downto 0);
        gi : out std_logic_vector  (31 downto 0);
        gr : out std_logic_vector  (31 downto 0);
-       alpha : out std_logic_vector  (31 downto 0);
-       onemalpha : out std_logic_vector  (31 downto 0);
        
        WP  : out STD_LOGIC_VECTOR(31 DOWNTO 0);
        WI  : out STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -178,18 +175,13 @@ signal int100I  : integer;
 signal int1r  : integer;
 signal int10r  : integer;
 signal int100r  : integer;
-signal int1L  : integer;
-signal int10L  : integer;
-signal int100L  : integer;
 
 signal WPint  : integer;
 signal WIint : integer;
 signal Wrint : integer;
-signal WLint : integer;
 signal WP_reg  : STD_LOGIC_VECTOR(31 DOWNTO 0);
 signal WI_reg : STD_LOGIC_VECTOR(31 DOWNTO 0);
 signal Wr_reg : STD_LOGIC_VECTOR(31 DOWNTO 0);
-signal WL_reg : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 
 
@@ -219,25 +211,6 @@ signal m_axis_result_tvalid_out1: std_logic :='0';
 signal m_axis_result_tready_in1: std_logic :='0';
 signal m_axis_result_tdata_out1: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-signal s_axis_a_tvalid_in6: std_logic :='0';
-signal s_axis_a_tready_out6: std_logic :='0';
-signal s_axis_a_tdata_in6 : STD_LOGIC_VECTOR(31 DOWNTO 0);
-signal s_axis_b_tvalid_in6: std_logic :='0';
-signal s_axis_b_tready_out6: std_logic :='0';
-signal s_axis_b_tdata_in6 : STD_LOGIC_VECTOR(31 DOWNTO 0);
-signal m_axis_result_tvalid_out6: std_logic :='0';
-signal m_axis_result_tready_in6: std_logic :='0';
-signal m_axis_result_tdata_out6: STD_LOGIC_VECTOR(31 DOWNTO 0);
-
-signal s_axis_a_tvalid_in7: std_logic :='0';
-signal s_axis_a_tready_out7: std_logic :='0';
-signal s_axis_a_tdata_in7 : STD_LOGIC_VECTOR(31 DOWNTO 0);
-signal s_axis_b_tvalid_in7: std_logic :='0';
-signal s_axis_b_tready_out7: std_logic :='0';
-signal s_axis_b_tdata_in7 : STD_LOGIC_VECTOR(31 DOWNTO 0);
-signal m_axis_result_tvalid_out7: std_logic :='0';
-signal m_axis_result_tready_in7: std_logic :='0';
-signal m_axis_result_tdata_out7: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 
 signal reg: STD_LOGIC_VECTOR(4 DOWNTO 0);
@@ -407,37 +380,7 @@ iconvertuintfloat: floating_point_1
         m_axis_result_tdata => m_axis_result_tdata_out1
       );  
       
-idividefloat: floating_point_6
-PORT MAP (
-    aclk => clk,
-    s_axis_a_tvalid => s_axis_a_tvalid_in6,
-    s_axis_a_tready => s_axis_a_tready_out6,
-    s_axis_a_tdata => s_axis_a_tdata_in6,
-    s_axis_b_tvalid => s_axis_b_tvalid_in6,
-    s_axis_b_tready => s_axis_b_tready_out6,
-    s_axis_b_tdata => s_axis_b_tdata_in6,
-    m_axis_result_tvalid => m_axis_result_tvalid_out6,
-    m_axis_result_tready => m_axis_result_tready_in6,
-    m_axis_result_tdata => m_axis_result_tdata_out6
-  );
 
-
-------------- Begin Cut here for INSTANTIATION Template ----- INST_TAG
-isubtractfloat: floating_point_7
-  PORT MAP (
-    aclk => clk,
-    s_axis_a_tvalid => s_axis_a_tvalid_in7,
-    s_axis_a_tready => s_axis_a_tready_out7,
-    s_axis_a_tdata => s_axis_a_tdata_in7,
-    s_axis_b_tvalid => s_axis_b_tvalid_in7,
-    s_axis_b_tready => s_axis_b_tready_out7,
-    s_axis_b_tdata => s_axis_b_tdata_in7,
-    m_axis_result_tvalid => m_axis_result_tvalid_out7,
-    m_axis_result_tready => m_axis_result_tready_in7,
-    m_axis_result_tdata => m_axis_result_tdata_out7
-  );
--- INST_TAG_END ------ End INSTANTIATION Template ---------   
-            
                     
 ------------- Begin Cut here for INSTANTIATION Template ----- INST_TAG
 idiv_gen: div_gen_2
@@ -566,18 +509,6 @@ process (r,DOUT5,DOUT6,DOUT7,int100r,int10r,int1r,WrAMPLOCKint,WrAMPLOCK_reg) be
 end process;
 WrAMPLOCK<=WrAMPLOCK_reg;
 
-process (Lowpass,DOUT5,DOUT6,DOUT7,int100L,int10L,int1L,WLint,WL_reg) begin
-    if (Lowpass='1') then
-    --100‚ÌˆÊ 
-    int100L <= CONV_INTEGER(unsigned(DOUT5)) * 100;
-    --10‚ÌˆÊ 
-    int10L <= CONV_INTEGER(unsigned(DOUT6)) * 10;
-    --1‚ÌˆÊ 
-    int1L <= CONV_INTEGER(unsigned(DOUT7)) * 1;
-    WLint<=int1L+int10L+int100L;
-    WL_reg<=conv_STD_LOGIC_VECTOR(WLint,32);
-    end if;
-end process;
 
 
 process (clk) begin
@@ -641,74 +572,7 @@ process (clk) begin
              reg<="01110";
         end if;
     when "01110" =>      
-        gr <=m_axis_result_tdata_out1;
-        reg<=reg+1;
-    when "01111" =>  
-        s_axis_a_tdata_in1<=WL_reg;
-        reg<=reg+1;
-    when "10000" =>
-        s_axis_a_tvalid_in1<='1'; 
-        reg<=reg+1;
-    when "10001" => 
-        if (m_axis_result_tvalid_out1='1') then
-            m_axis_result_tready_in1<='1';
-            s_axis_a_tvalid_in1<='0';
-            reg<=reg+1;
-        end if;       
-    when "10010" =>
-        if (m_axis_result_tvalid_out1='0') then
-             m_axis_result_tready_in1<='0';
-             reg<=reg+1;
-        end if;
-    when "10011" =>
-        reg<=reg+1;      
-        alpha_reg <=m_axis_result_tdata_out1;
-    when "10100" =>    
-        reg<=reg+1; 
-        s_axis_a_tdata_in6<=alpha_reg;
-        s_axis_b_tdata_in6<="01000010110010000000000000000000"; 
-        reg<=reg+1;
-    when "10101" => 
-        s_axis_a_tvalid_in6<='1';
-        s_axis_b_tvalid_in6<='1';
-        reg<=reg+1;
-    when "10110" =>        
-        if (m_axis_result_tvalid_out6='1') then
-            m_axis_result_tready_in6<='1';
-            s_axis_a_tvalid_in6<='0';
-            s_axis_b_tvalid_in6<='0';
-            reg<=reg+1;
-        end if;
-    when "10111" =>     
-        if (m_axis_result_tvalid_out6='0') then
-             m_axis_result_tready_in6<='0';
-             reg<=reg+1;
-        end if;
-    when "11000" =>
-        alpha<=m_axis_result_tdata_out6;
-        reg<=reg+1;
-    when "11001" =>
-        s_axis_a_tdata_in7<="00111111100000000000000000000000";
-        s_axis_b_tdata_in7<=m_axis_result_tdata_out6;    
-        reg<=reg+1;
-    when "11010" =>     
-        s_axis_a_tvalid_in7<='1';
-        s_axis_b_tvalid_in7<='1';
-        reg<=reg+1; 
-    when "11011" =>        
-        if (m_axis_result_tvalid_out7='1') then
-            m_axis_result_tready_in7<='1';
-            s_axis_a_tvalid_in7<='0';
-            s_axis_b_tvalid_in7<='0';
-            reg<=reg+1;
-        end if;
-    when "11100" => 
-        if (m_axis_result_tvalid_out7='0') then
-             m_axis_result_tready_in7<='0';
-             reg<=reg+1;
-        end if;            
-    when "11101" => 
-         onemalpha<=m_axis_result_tdata_out7; 
+        gr <=m_axis_result_tdata_out1; 
          reg<="00000";
     when others =>  reg<="00000";
     end case;    

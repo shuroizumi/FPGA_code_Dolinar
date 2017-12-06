@@ -317,13 +317,10 @@ component control_PID is
       P : in std_logic :='0';
       I : in std_logic :='0';
       r : in std_logic :='0';
-      Lowpass: in std_logic :='0';
 --      floating point
       gp : out std_logic_vector  (31 downto 0);
       gi : out std_logic_vector  (31 downto 0);
       gr : out std_logic_vector  (31 downto 0);
-      alpha : out std_logic_vector  (31 downto 0);
-      onemalpha : out std_logic_vector  (31 downto 0);
 --      std logic vector
       WP  : out STD_LOGIC_VECTOR(31 DOWNTO 0);
       WI  : out STD_LOGIC_VECTOR(31 DOWNTO 0);
